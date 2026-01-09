@@ -77,13 +77,13 @@
                             <img src="${item.image}" alt="${item.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22%3E%3Crect fill=%22%23f0f0f0%22 width=%2250%22 height=%2250%22/%3E%3C/svg%3E'">
                             <div>
                                 <strong>${item.name}</strong>
-                                <span>Qty: ${item.quantity} × $${item.price.toFixed(2)}</span>
+                                <span>Qty: ${item.quantity} × ₹${item.price.toFixed(2)}</span>
                             </div>
                         </div>
                     `).join('')}
                 </div>
                 <div class="order-total">
-                    Total: <strong>$${order.total.toFixed(2)}</strong>
+                    Total: <strong>₹${order.total.toFixed(2)}</strong>
                 </div>
             </div>
         `).join('');

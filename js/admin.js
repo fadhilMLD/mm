@@ -79,7 +79,7 @@
   // Product CRUD wiring
   let products = [];
   let editingId = null;
-  const API_URL = 'http://localhost:3000/api';
+  const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : `${window.location.origin}/api`;
 
   async function getProducts(){
     try {
@@ -112,7 +112,7 @@
         <div class="admin-product-info">
           <h4>${p.name}</h4>
           <p class="admin-product-brand"><i class="fas fa-tag"></i> ${p.brand}</p>
-          <p class="admin-product-price"><i class="fas fa-dollar-sign"></i> $${Number(p.price).toFixed(2)}</p>
+          <p class="admin-product-price"><i class="fas fa-rupee-sign"></i> ₹${Number(p.price).toFixed(2)}</p>
           <p class="admin-product-stock"><i class="fas fa-boxes"></i> Stock: ${p.stock} ${p.stock < 10 ? '<span class="low-stock">(Low)</span>' : ''}</p>
         </div>
         <div class="admin-product-actions">

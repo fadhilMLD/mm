@@ -45,7 +45,7 @@ function displayCart() {
             <div class="cart-item-details">
                 <h3>${item.name}</h3>
                 <p class="cart-item-brand">${item.brand}</p>
-                <p class="cart-item-price">$${item.price.toFixed(2)}</p>
+                <p class="cart-item-price">₹${item.price.toFixed(2)}</p>
             </div>
             <div class="cart-item-quantity">
                 <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">
@@ -58,7 +58,7 @@ function displayCart() {
                 </button>
             </div>
             <div class="cart-item-total">
-                <p>$${(item.price * item.quantity).toFixed(2)}</p>
+                <p>₹${(item.price * item.quantity).toFixed(2)}</p>
             </div>
             <button class="cart-item-remove" onclick="removeFromCart(${item.id})">
                 <i class="fas fa-trash"></i>
@@ -126,13 +126,13 @@ function removeFromCart(productId) {
 function updateSummary() {
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const tax = subtotal * 0.1; // 10% tax
-    const shipping = subtotal > 0 ? 10 : 0; // $10 flat shipping
+    const shipping = subtotal > 0 ? 10 : 0; // ₹10 flat shipping
     const total = subtotal + tax + shipping;
     
-    document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-    document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
-    document.getElementById('shipping').textContent = `$${shipping.toFixed(2)}`;
-    document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+    document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+    document.getElementById('tax').textContent = `₹${tax.toFixed(2)}`;
+    document.getElementById('shipping').textContent = `₹${shipping.toFixed(2)}`;
+    document.getElementById('total').textContent = `₹${total.toFixed(2)}`;
 }
 
 function updateCartCount() {

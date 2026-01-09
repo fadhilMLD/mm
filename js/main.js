@@ -3,7 +3,8 @@ const StorageManager = {
     getProducts: async function() {
         // Try API first
         try {
-            const response = await fetch('http://localhost:3000/api/products');
+            const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api/products' : '/api/products';
+            const response = await fetch(apiUrl);
             if (response.ok) {
                 const products = await response.json();
                 if (products && products.length > 0) {
@@ -205,7 +206,7 @@ function displayProducts(products) {
                     <p class="product-description">${product.description || product.shortDescription}</p>
                     ${product.specs ? `<p class="product-specs"><i class="fas fa-info-circle"></i> ${product.specs}</p>` : ''}
                     <div class="product-footer">
-                        <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <div class="product-price">₹${product.price.toFixed(2)}</div>
                         <button class="btn btn-primary btn-add-cart" 
                                 onclick="event.preventDefault(); event.stopPropagation(); addToCart(${product.id})" 
                                 ${product.stock === 0 ? 'disabled' : ''}>
@@ -267,8 +268,8 @@ function renderDealsStrip() {
             <div class="deal-thumb"><img src="${p.image}" alt="${p.name}"></div>
             <div class="deal-body">
                 <div class="price-row">
-                    <strong>$${p.price.toFixed(2)}</strong>
-                    <span class="price-old">$${old.toFixed(2)}</span>
+                    <strong>₹${p.price.toFixed(2)}</strong>
+                    <span class="price-old">₹${old.toFixed(2)}</span>
                     <span class="deal-badge">${off}% OFF</span>
                 </div>
                 <div class="deal-name">${p.name}</div>
@@ -452,7 +453,7 @@ function loadRelatedProducts(allProducts) {
                 <div class="product-brand">${product.brand}</div>
                 <h3 class="product-name">${product.name}</h3>
                 <div class="product-footer">
-                    <div class="product-price">$${product.price.toFixed(2)}</div>
+                    <div class="product-price">₹${product.price.toFixed(2)}</div>
                     <a href="product.html?id=${slug}" class="btn btn-primary">View</a>
                 </div>
             </div>

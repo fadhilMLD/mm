@@ -5,7 +5,7 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -29,13 +29,22 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Ensure data.json exists
+const dataPath = path.join(__dirname, 'products', 'data.json');
+if (!fs.existsSync(path.dirname(dataPath))) {
+    fs.mkdirSync(path.dirname(dataPath), { recursive: true });
+}
+if (!fs.existsSync(dataPath)) {
+    fs.writeFileSync(dataPath, JSON.stringify({ products: [] }, null, 2));
+}
+
 // Get all products
 app.get('/api/products', (req, res) => {
     try {
-        const dataPath = path.join(__dirname, 'products', 'data.json');
         const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
         res.json(data.products);
     } catch (error) {
+        console.error('Error loading products:', error);
         res.status(500).json({ error: 'Failed to load products' });
     }
 });
@@ -43,7 +52,6 @@ app.get('/api/products', (req, res) => {
 // Add new product with images
 app.post('/api/products', upload.array('images', 10), (req, res) => {
     try {
-        const dataPath = path.join(__dirname, 'products', 'data.json');
         const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
         
         // Process uploaded images
@@ -82,7 +90,7 @@ app.post('/api/products', upload.array('images', 10), (req, res) => {
         
         res.json({ success: true, product: newProduct });
     } catch (error) {
-        console.error(error);
+        console.error('Error adding product:', error);
         res.status(500).json({ error: 'Failed to add product' });
     }
 });
@@ -90,7 +98,6 @@ app.post('/api/products', upload.array('images', 10), (req, res) => {
 // Update product
 app.put('/api/products/:id', upload.array('images', 10), (req, res) => {
     try {
-        const dataPath = path.join(__dirname, 'products', 'data.json');
         const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
         
         const productId = parseInt(req.params.id);
@@ -136,7 +143,7 @@ app.put('/api/products/:id', upload.array('images', 10), (req, res) => {
         
         res.json({ success: true, product: data.products[productIndex] });
     } catch (error) {
-        console.error(error);
+        console.error('Error updating product:', error);
         res.status(500).json({ error: 'Failed to update product' });
     }
 });
@@ -144,7 +151,6 @@ app.put('/api/products/:id', upload.array('images', 10), (req, res) => {
 // Delete product
 app.delete('/api/products/:id', (req, res) => {
     try {
-        const dataPath = path.join(__dirname, 'products', 'data.json');
         const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
         
         const productId = parseInt(req.params.id);
@@ -169,12 +175,13 @@ app.delete('/api/products/:id', (req, res) => {
         
         res.json({ success: true });
     } catch (error) {
-        console.error(error);
+        console.error('Error deleting product:', error);
         res.status(500).json({ error: 'Failed to delete product' });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Admin portal: http://localhost:${PORT}/admin.html`);
 });

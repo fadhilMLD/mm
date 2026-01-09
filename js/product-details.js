@@ -156,7 +156,7 @@
         // Product info
         document.getElementById('product-badge').textContent = currentProduct.brand;
         document.getElementById('product-title').textContent = currentProduct.name;
-        document.getElementById('product-price').textContent = `$${currentProduct.price.toFixed(2)}`;
+        document.getElementById('product-price').textContent = `₹${currentProduct.price.toFixed(2)}`;
         document.getElementById('product-short-desc').textContent = currentProduct.shortDescription;
 
         // Stock info
@@ -283,7 +283,8 @@
     async function getProducts() {
         // Try API first
         try {
-            const response = await fetch('http://localhost:3000/api/products');
+            const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api/products' : '/api/products';
+            const response = await fetch(apiUrl);
             if (response.ok) {
                 const products = await response.json();
                 if (products && products.length > 0) {
