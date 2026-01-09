@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - MetroMobiles</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a class="logo" href="index.html">
+                    <img src="images/logo.png" alt="Metro Mobiles">
+                </a>
+                <nav>
+                    <ul id="main-nav">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+                        <li><a href="profile.html" class="active"><i class="fas fa-user"></i> Profile</a></li>
+                        <li><a href="admin.html">Admin</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Profile Section -->
+    <section class="profile-section">
+        <div class="container">
+            <h2>My Profile</h2>
+            
+            <div class="profile-content">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="profile-name">User Name</h3>
+                            <p id="profile-email">user@email.com</p>
+                            <span id="profile-badge" class="profile-badge" style="display: none;"></span>
+                        </div>
+                    </div>
+
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-shopping-bag"></i>
+                            <div>
+                                <strong id="total-orders">0</strong>
+                                <span>Orders</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-calendar"></i>
+                            <div>
+                                <strong id="member-since">2026</strong>
+                                <span>Member Since</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button id="logout-btn" class="btn btn-danger btn-block">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                </div>
+
+                <div class="profile-orders">
+                    <h3>Order History</h3>
+                    <div id="orders-list">
+                        <p class="no-orders">No orders yet. <a href="index.html">Start shopping!</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>MetroMobiles</h3>
+                    <p>Your trusted mobile shopping destination</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cart.html">Cart</a></li>
+                        <li><a href="admin.html">Admin</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-envelope"></i> info@metromobiles.com</p>
+                    <p><i class="fas fa-phone"></i> +1 234 567 8900</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 MetroMobiles. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>

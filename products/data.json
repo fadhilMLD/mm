@@ -1,0 +1,122 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "slug": "iphone-15-pro",
+      "name": "iPhone 15 Pro",
+      "brand": "Apple",
+      "price": 999.99,
+      "image": "products/images/iphone-15-pro.jpg",
+      "shortDescription": "Latest iPhone with A17 Pro chip, titanium design, and advanced camera system",
+      "fullDescription": "The iPhone 15 Pro represents the pinnacle of smartphone technology. Crafted from aerospace-grade titanium, it's lighter and more durable than ever. The A17 Pro chip delivers unprecedented performance, making even the most demanding tasks effortless. With ProMotion technology, Always-On display, and Dynamic Island, your experience is smooth and intuitive.",
+      "images": [
+        "products/images/iphone-15-pro.jpg",
+        "products/images/iphone-15-pro-2.jpg",
+        "products/images/iphone-15-pro-3.jpg"
+      ],
+      "stock": 25,
+      "category": "Smartphones",
+      "specifications": {
+        "Display": "6.1-inch Super Retina XDR display with ProMotion",
+        "Processor": "A17 Pro chip with 6-core CPU",
+        "RAM": "8GB",
+        "Storage": "256GB / 512GB / 1TB",
+        "Camera": "48MP Main + 12MP Ultra Wide + 12MP Telephoto",
+        "Front Camera": "12MP TrueDepth",
+        "Battery": "Up to 23 hours video playback",
+        "OS": "iOS 17",
+        "Connectivity": "5G, Wi-Fi 6E, Bluetooth 5.3",
+        "Colors": "Natural Titanium, Blue Titanium, White Titanium, Black Titanium"
+      },
+      "features": [
+        "Titanium design - aerospace-grade titanium band",
+        "Action button - customizable shortcut button",
+        "Dynamic Island - interactive notification system",
+        "Always-On display with ProMotion",
+        "Cinematic mode in 4K at 30fps",
+        "Emergency SOS via satellite",
+        "Face ID facial recognition",
+        "Water and dust resistant (IP68)"
+      ]
+    },
+    {
+      "id": 2,
+      "slug": "samsung-galaxy-s24-ultra",
+      "name": "Samsung Galaxy S4 Ultra",
+      "brand": "Samsung",
+      "price": 1199.99,
+      "shortDescription": "undefined",
+      "fullDescription": "The Galaxy S24 Ultra pushes the boundaries of what a smartphone can do. With its built-in S Pen, you can write, draw, and navigate with precision. The 200MP camera with 100x Space Zoom captures stunning details from any distance. Powered by Snapdragon 8 Gen 3, it handles multitasking, gaming, and AI features with ease.",
+      "images": [
+        "products/images/1767956518812-684274180.png"
+      ],
+      "stock": 30,
+      "category": "Smartphones",
+      "specifications": {
+        "Display": "6.8-inch Dynamic AMOLED 2X, 120Hz",
+        "Processor": "Snapdragon 8 Gen 3 for Galaxy",
+        "RAM": "12GB",
+        "Storage": "256GB / 512GB / 1TB",
+        "Camera": "200MP Main + 12MP Ultra Wide + 50MP Periscope + 10MP Telephoto",
+        "Front Camera": "12MP",
+        "Battery": "5000mAh with 45W fast charging",
+        "OS": "Android 14 with One UI 6.1",
+        "Connectivity": "5G, Wi-Fi 7, Bluetooth 5.3, UWB",
+        "Colors": "Titanium Gray, Titanium Black, Titanium Violet, Titanium Yellow"
+      },
+      "features": [
+        "Built-in S Pen with AI features",
+        "100x Space Zoom with enhanced stabilization",
+        "Galaxy AI - real-time translation, photo editing",
+        "Quad HD+ resolution with Vision Booster",
+        "Armor Aluminum frame with Gorilla Glass Victus 2",
+        "IP68 water and dust resistance",
+        "Ultrasonic fingerprint sensor",
+        "Wireless PowerShare reverse charging"
+      ],
+      "image": "products/images/1767956518812-684274180.png",
+      "description": "undefined",
+      "specs": ""
+    },
+    {
+      "id": 3,
+      "slug": "google-pixel-8-pro",
+      "name": "Google Pixel 8 Pro",
+      "brand": "Google",
+      "price": 899.99,
+      "shortDescription": "undefined",
+      "fullDescription": "Experience the future of smartphones with Google Pixel 8 Pro. Powered by Google Tensor G3, it brings advanced AI capabilities to everything you do. The camera system uses computational photography to capture perfect shots in any lighting. With pure Android and guaranteed updates, you'll always have the latest features.",
+      "images": [
+        "products/images/1767957657047-810076653.webp",
+        "products/images/1767957657048-171424505.png"
+      ],
+      "stock": 20,
+      "category": "Smartphones",
+      "specifications": {
+        "Display": "6.7-inch LTPO OLED, 120Hz adaptive refresh",
+        "Processor": "Google Tensor G3",
+        "RAM": "12GB",
+        "Storage": "128GB / 256GB / 512GB",
+        "Camera": "50MP Main + 48MP Ultra Wide + 48MP Telephoto with 5x optical zoom",
+        "Front Camera": "10.5MP",
+        "Battery": "5050mAh with 30W fast charging",
+        "OS": "Android 14 with 7 years of updates",
+        "Connectivity": "5G, Wi-Fi 7, Bluetooth 5.3, UWB",
+        "Colors": "Obsidian, Porcelain, Bay"
+      },
+      "features": [
+        "Magic Eraser - remove unwanted objects from photos",
+        "Best Take - combine faces from multiple shots",
+        "Night Sight - incredible low-light photography",
+        "Live Translate - real-time conversation translation",
+        "Call Screen - AI assistant answers calls",
+        "Temperature sensor for health tracking",
+        "Face Unlock and fingerprint sensor",
+        "IP68 water and dust resistance"
+      ],
+      "image": "products/images/1767957657047-810076653.webp",
+      "description": "undefined",
+      "specs": ""
+    }
+  ]
+}

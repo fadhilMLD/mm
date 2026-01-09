@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Product Details - MetroMobiles</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a class="logo" href="index.html">
+                    <img src="images/logo.png" alt="Metro Mobiles">
+                </a>
+                <nav>
+                    <ul id="main-nav">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+                        <li id="auth-nav-item"><a href="auth.html"><i class="fas fa-user"></i> Login</a></li>
+                        <li><a href="admin.html">Admin</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Product Details Section -->
+    <section class="product-details-section">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <span>/</span>
+                <span id="breadcrumb-category">Smartphones</span>
+                <span>/</span>
+                <span id="breadcrumb-product">Product</span>
+            </div>
+
+            <!-- Product Details -->
+            <div class="product-details-grid">
+                <!-- Image Gallery -->
+                <div class="product-gallery">
+                    <div class="main-image">
+                        <img id="main-product-image" src="" alt="Product">
+                        <span id="stock-indicator" class="stock-indicator"></span>
+                    </div>
+                    <div class="thumbnail-gallery" id="thumbnail-gallery">
+                        <!-- Thumbnails will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="product-details-info">
+                    <div class="product-badge" id="product-badge"></div>
+                    <h1 id="product-title">Product Name</h1>
+                    
+                    <div class="product-price-section">
+                        <div class="product-price-large" id="product-price">$0.00</div>
+                        <div class="product-stock-info" id="stock-info">In Stock</div>
+                    </div>
+
+                    <p class="product-short-desc" id="product-short-desc"></p>
+
+                    <!-- Quantity Selector -->
+                    <div class="quantity-selector">
+                        <label>Quantity:</label>
+                        <div class="quantity-controls">
+                            <button class="qty-btn" id="qty-minus"><i class="fas fa-minus"></i></button>
+                            <input type="number" id="quantity-input" value="1" min="1" max="10">
+                            <button class="qty-btn" id="qty-plus"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="product-actions">
+                        <button id="add-to-cart-btn" class="btn btn-primary btn-large">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <button id="buy-now-btn" class="btn btn-secondary btn-large">
+                            <i class="fas fa-bolt"></i> Buy Now
+                        </button>
+                    </div>
+
+                    <!-- Features List -->
+                    <div class="product-highlights">
+                        <h3><i class="fas fa-check-circle"></i> Key Features</h3>
+                        <ul id="features-list">
+                            <!-- Features will be loaded here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Section -->
+            <div class="product-tabs">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="description">Description</button>
+                    <button class="tab-btn" data-tab="specifications">Specifications</button>
+                </div>
+
+                <div class="tabs-content">
+                    <!-- Description Tab -->
+                    <div class="tab-panel active" id="description-panel">
+                        <h2>About This Product</h2>
+                        <p id="full-description"></p>
+                    </div>
+
+                    <!-- Specifications Tab -->
+                    <div class="tab-panel" id="specifications-panel">
+                        <h2>Technical Specifications</h2>
+                        <table class="specs-table" id="specs-table">
+                            <!-- Specifications will be loaded here -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Products -->
+            <div class="related-products">
+                <h2>You May Also Like</h2>
+                <div class="products-grid" id="related-products-grid">
+                    <!-- Related products will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>MetroMobiles</h3>
+                    <p>Your trusted mobile shopping destination</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="cart.html">Cart</a></li>
+                        <li><a href="admin.html">Admin</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-envelope"></i> info@metromobiles.com</p>
+                    <p><i class="fas fa-phone"></i> +1 234 567 8900</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 MetroMobiles. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/product-details.js"></script>
+</body>
+</html>
