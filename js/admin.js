@@ -106,7 +106,9 @@
     if(!listEl) return;
     if(products.length === 0){ listEl.style.display = 'none'; emptyEl.style.display = 'block'; return; }
     listEl.style.display = 'grid'; emptyEl.style.display = 'none';
-    listEl.innerHTML = products.map(p => `
+    listEl.innerHTML = products.map(p => {
+      const productId = p._id || p.id; // Support both MongoDB _id and legacy id
+      return `
       <div class="admin-product-card">
         <div class="admin-product-image"><img src="${p.image}" alt="${p.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22150%22 height=%22150%22/%3E%3Ctext fill=%22%23999%22 font-family=%22Arial%22 font-size=%2214%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E'>"></div>
         <div class="admin-product-info">
@@ -116,10 +118,11 @@
           <p class="admin-product-stock"><i class="fas fa-boxes"></i> Stock: ${p.stock} ${p.stock < 10 ? '<span class="low-stock">(Low)</span>' : ''}</p>
         </div>
         <div class="admin-product-actions">
-          <button class="btn btn-edit" data-action="edit" data-id="${p.id}"><i class="fas fa-edit"></i> Edit</button>
-          <button class="btn btn-delete" data-action="delete" data-id="${p.id}"><i class="fas fa-trash"></i> Delete</button>
+          <button class="btn btn-edit" data-action="edit" data-id="${productId}"><i class="fas fa-edit"></i> Edit</button>
+          <button class="btn btn-delete" data-action="delete" data-id="${productId}"><i class="fas fa-trash"></i> Delete</button>
         </div>
-      </div>`).join('');
+      </div>`
+    }).join('');
   }
 
   function updateStats(){ const el = document.getElementById('total-products'); if(el) el.textContent = String(products.length); }
@@ -188,17 +191,26 @@
     if(!listEl || listEl.dataset.wired) return; listEl.dataset.wired = '1';
     listEl.addEventListener('click', (e)=>{
       const t = e.target.closest('[data-action]'); if(!t) return;
-      const id = Number(t.dataset.id);
+      const id = t.dataset.id;
+      
       if(t.dataset.action === 'edit'){
-        const p = products.find(x=>x.id===id); if(!p) return;
+        const p = products.find(x=>(x._id || x.id) == id); 
+        if(!p) return;
         editingId = id;
-        document.getElementById('product-id').value = p.id;
+        
+        document.getElementById('product-id').value = id;
         document.getElementById('product-name').value = p.name;
         document.getElementById('product-brand').value = p.brand;
+        document.getElementById('product-mrp').value = p.mrp || p.price;
         document.getElementById('product-price').value = p.price;
         document.getElementById('product-description').value = p.description;
         document.getElementById('product-short-description').value = p.shortDescription || '';
         document.getElementById('product-stock').value = p.stock;
+        
+        // Trigger discount display update
+        if (typeof updateDiscountDisplay === 'function') {
+          updateDiscountDisplay();
+        }
         
         // Populate specifications
         const specsContainer = document.getElementById('specs-container');
@@ -245,7 +257,6 @@
           ).join('');
           document.getElementById('product-image').removeAttribute('required');
         } else if(p.image){
-          // Fallback for old single-image products
           const previewDiv = document.getElementById('image-preview');
           const previewContainer = document.getElementById('preview-container');
           previewDiv.style.display = 'block';
@@ -258,17 +269,24 @@
         document.getElementById('cancel-btn').style.display = 'inline-block';
         document.getElementById('product-form').scrollIntoView({behavior:'smooth'});
       }
+      
       if(t.dataset.action === 'delete'){
-        const p = products.find(x=>x.id===id); if(!p) return;
-        if(confirm(`Delete "${p.name}"?`)){
-          // Delete via API
+        const p = products.find(x=>(x._id || x.id) == id);
+        if(!p) return;
+        if(confirm(`Delete "${p.name}"?\n\nThis will remove the product from all users' carts and the database.`)){
+          // Delete via API using MongoDB _id
           fetch(`${API_URL}/products/${id}`, { method: 'DELETE' })
             .then(res => res.json())
-            .then(async () => {
+            .then(async (data) => {
+              // Clean up localStorage carts on this client
+              if (data.deletedProductId) {
+                cleanupCartAfterProductDeletion(data.deletedProductId);
+              }
+              
               products = await getProducts();
               renderList();
               updateStats();
-              showToast('Product deleted successfully!');
+              showToast('Product deleted and removed from all carts!');
             })
             .catch(err => {
               console.error(err);
@@ -277,6 +295,24 @@
         }
       }
     });
+  }
+
+  // Add function to clean up carts after product deletion
+  function cleanupCartAfterProductDeletion(deletedProductId) {
+    try {
+      const cart = JSON.parse(localStorage.getItem('metromobiles_cart') || '[]');
+      const updatedCart = cart.filter(item => {
+        // Remove items that match the deleted product ID
+        return item.id != deletedProductId && item.id !== deletedProductId;
+      });
+      
+      if (updatedCart.length !== cart.length) {
+        localStorage.setItem('metromobiles_cart', JSON.stringify(updatedCart));
+        console.log('Cart cleaned up: removed deleted product');
+      }
+    } catch (error) {
+      console.error('Error cleaning up cart:', error);
+    }
   }
 
   function wireForm(){
@@ -337,6 +373,7 @@
         const formData = new FormData();
         formData.append('name', document.getElementById('product-name').value.trim());
         formData.append('brand', document.getElementById('product-brand').value.trim());
+        formData.append('mrp', document.getElementById('product-mrp').value);
         formData.append('price', document.getElementById('product-price').value);
         formData.append('description', document.getElementById('product-description').value.trim());
         formData.append('shortDescription', document.getElementById('product-short-description').value.trim());

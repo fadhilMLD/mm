@@ -139,6 +139,7 @@ let filteredProducts = [];
 // Initialize page
 document.addEventListener('DOMContentLoaded', async function() {
     await loadProducts();
+    await validateAndCleanCart();
     updateCartCount();
     setupEventListeners();
     renderHomepageEnhancements();
@@ -191,12 +192,19 @@ function displayProducts(products) {
     noProducts.style.display = 'none';
     
     productsGrid.innerHTML = products.map(product => {
-        const slug = generateProductSlug(product.name);
+        const productId = product._id || product.id; // Support both MongoDB _id and legacy id
+        const slug = product.slug || generateProductSlug(product.name);
+        const mrp = product.mrp || product.price;
+        const salePrice = product.price;
+        const hasDiscount = mrp > salePrice;
+        const discountPercent = hasDiscount ? Math.round(((mrp - salePrice) / mrp) * 100) : 0;
+        
         return `
         <div class="product-card">
             <a href="product.html?id=${slug}" class="product-link">
                 <div class="product-image">
                     <img src="${product.image}" alt="${product.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22%3E%3Crect fill=%22%23f0f0f0%22 width=%22300%22 height=%22300%22/%3E%3Ctext fill=%22%23999%22 font-family=%22Arial%22 font-size=%2218%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                    ${hasDiscount ? `<span class="discount-badge">${discountPercent}% OFF</span>` : ''}
                     ${product.stock < 10 && product.stock > 0 ? '<span class="stock-badge low">Only ' + product.stock + ' left!</span>' : ''}
                     ${product.stock === 0 ? '<span class="stock-badge out">Out of Stock</span>' : ''}
                 </div>
@@ -206,9 +214,12 @@ function displayProducts(products) {
                     <p class="product-description">${product.description || product.shortDescription}</p>
                     ${product.specs ? `<p class="product-specs"><i class="fas fa-info-circle"></i> ${product.specs}</p>` : ''}
                     <div class="product-footer">
-                        <div class="product-price">₹${product.price.toFixed(2)}</div>
+                        <div class="product-price">
+                            ${hasDiscount ? `<span class="original-price">₹${mrp.toFixed(2)}</span>` : ''}
+                            <span class="sale-price">₹${salePrice.toFixed(2)}</span>
+                        </div>
                         <button class="btn btn-primary btn-add-cart" 
-                                onclick="event.preventDefault(); event.stopPropagation(); addToCart(${product.id})" 
+                                onclick="event.preventDefault(); event.stopPropagation(); addToCart('${productId}')" 
                                 ${product.stock === 0 ? 'disabled' : ''}>
                             <i class="fas fa-shopping-cart"></i> 
                             ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -230,7 +241,6 @@ function generateProductSlug(name) {
 function renderHomepageEnhancements() {
     try {
         renderBrandChips();
-        renderDealsStrip();
         renderBrandTiles();
     } catch (e) { /* no-op if elements missing */ }
 }
@@ -318,13 +328,12 @@ function renderBrandTiles() {
 }
 
 function handleSearch() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    filteredProducts = allProducts.filter(product => 
-        product.name.toLowerCase().includes(searchTerm) ||
-        product.brand.toLowerCase().includes(searchTerm) ||
-        product.description.toLowerCase().includes(searchTerm)
-    );
-    displayProducts(filteredProducts);
+    const searchTerm = document.getElementById('search-input').value.trim();
+    
+    if (searchTerm) {
+        // Redirect to search page with query parameter
+        window.location.href = `search.html?q=${encodeURIComponent(searchTerm)}`;
+    }
 }
 
 function handleSort() {
@@ -364,14 +373,14 @@ function handleBrandFilter() {
 }
 
 function addToCart(productId) {
-    const product = allProducts.find(p => p.id === productId);
+    const product = allProducts.find(p => (p._id || p.id) == productId);
     if (!product || product.stock === 0) {
         alert('Sorry, this product is out of stock!');
         return;
     }
     
     const cart = StorageManager.getCart();
-    const existingItem = cart.find(item => item.id === productId);
+    const existingItem = cart.find(item => item.id == productId);
     
     if (existingItem) {
         if (existingItem.quantity >= product.stock) {
@@ -381,7 +390,7 @@ function addToCart(productId) {
         existingItem.quantity++;
     } else {
         cart.push({
-            id: product.id,
+            id: product._id || product.id, // Use MongoDB _id
             name: product.name,
             brand: product.brand,
             price: product.price,
@@ -393,8 +402,6 @@ function addToCart(productId) {
     
     StorageManager.saveCart(cart);
     updateCartCount();
-    
-    // Visual feedback
     showNotification('Added to cart successfully!');
 }
 
@@ -459,4 +466,31 @@ function loadRelatedProducts(allProducts) {
             </div>
         </div>
     `}).join('');
+}
+
+async function validateAndCleanCart() {
+    try {
+        const cart = StorageManager.getCart();
+        if (cart.length === 0) return;
+        
+        // Get valid product IDs from loaded products
+        const validProductIds = new Set(
+            allProducts.map(p => (p._id || p.id)?.toString())
+        );
+        
+        // Filter out products that no longer exist
+        const validCart = cart.filter(item => {
+            const itemId = item.id?.toString();
+            return validProductIds.has(itemId);
+        });
+        
+        // If cart was cleaned up, save silently
+        if (validCart.length !== cart.length) {
+            StorageManager.saveCart(validCart);
+            const removedCount = cart.length - validCart.length;
+            console.log(`Removed ${removedCount} unavailable product(s) from cart`);
+        }
+    } catch (error) {
+        console.error('Error validating cart:', error);
+    }
 }

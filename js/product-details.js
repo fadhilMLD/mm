@@ -156,7 +156,24 @@
         // Product info
         document.getElementById('product-badge').textContent = currentProduct.brand;
         document.getElementById('product-title').textContent = currentProduct.name;
-        document.getElementById('product-price').textContent = `₹${currentProduct.price.toFixed(2)}`;
+        
+        // Price display with discount
+        const mrp = currentProduct.mrp || currentProduct.price;
+        const salePrice = currentProduct.price;
+        const hasDiscount = mrp > salePrice;
+        const discountPercent = hasDiscount ? Math.round(((mrp - salePrice) / mrp) * 100) : 0;
+        
+        const priceElement = document.getElementById('product-price');
+        if (hasDiscount) {
+            priceElement.innerHTML = `
+                <span class="original-price" style="text-decoration: line-through; color: #999; font-size: 1.2rem; margin-right: 0.5rem;">₹${mrp.toFixed(2)}</span>
+                <span class="sale-price" style="color: var(--primary-color); font-size: 1.8rem; font-weight: 700;">₹${salePrice.toFixed(2)}</span>
+                <span class="discount-badge" style="display: inline-block; margin-left: 0.5rem; padding: 0.25rem 0.75rem; background: #10b981; color: white; border-radius: 4px; font-size: 0.9rem; font-weight: 600;">${discountPercent}% OFF</span>
+            `;
+        } else {
+            priceElement.textContent = `₹${salePrice.toFixed(2)}`;
+        }
+        
         document.getElementById('product-short-desc').textContent = currentProduct.shortDescription;
 
         // Stock info
@@ -263,21 +280,31 @@
             .slice(0, 4);
 
         const grid = document.getElementById('related-products-grid');
-        grid.innerHTML = related.map(product => `
+        grid.innerHTML = related.map(product => {
+            const mrp = product.mrp || product.price;
+            const salePrice = product.price;
+            const hasDiscount = mrp > salePrice;
+            const discountPercent = hasDiscount ? Math.round(((mrp - salePrice) / mrp) * 100) : 0;
+            
+            return `
             <div class="product-card">
                 <div class="product-image">
                     <img src="${product.image}" alt="${product.name}">
+                    ${hasDiscount ? `<span class="discount-badge">${discountPercent}% OFF</span>` : ''}
                 </div>
                 <div class="product-info">
                     <div class="product-brand">${product.brand}</div>
                     <h3 class="product-name">${product.name}</h3>
                     <div class="product-footer">
-                        <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <div class="product-price">
+                            ${hasDiscount ? `<span class="original-price">₹${mrp.toFixed(2)}</span>` : ''}
+                            <span class="sale-price">₹${salePrice.toFixed(2)}</span>
+                        </div>
                         <a href="product.html?id=${generateSlug(product.name)}" class="btn btn-primary">View</a>
                     </div>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     async function getProducts() {

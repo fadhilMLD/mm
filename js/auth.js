@@ -2,8 +2,10 @@
 (function() {
     'use strict';
 
+    const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
     const AUTH_STORAGE_KEY = 'metromobiles_users';
     const SESSION_KEY = 'metromobiles_user_session';
+    const TOKEN_KEY = 'metromobiles_auth_token';
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
@@ -128,43 +130,37 @@
         }
     }
 
-    function processGoogleUser(googleData) {
-        const users = getUsers();
-        let user = users.find(u => u.email === googleData.email && u.provider === 'google');
+    async function processGoogleUser(googleData) {
+        try {
+            const response = await fetch(`${API_URL}/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(googleData)
+            });
 
-        if (!user) {
-            // Create new user
-            user = {
-                id: Date.now(),
-                name: googleData.name,
-                email: googleData.email,
-                provider: 'google',
-                googleId: googleData.googleId,
-                picture: googleData.picture,
-                createdAt: new Date().toISOString(),
-                orders: []
-            };
-            users.push(user);
-            saveUsers(users);
-            showNotification('Account created successfully with Google!');
-        } else {
-            // Update picture if changed
-            if (googleData.picture) {
-                user.picture = googleData.picture;
-                saveUsers(users);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Google authentication failed');
             }
-            showNotification('Welcome back, ' + user.name + '!');
-        }
 
-        createSession(user);
-        
-        // Check for checkout redirect
-        const checkoutRedirect = sessionStorage.getItem('checkout_redirect');
-        if (checkoutRedirect) {
-            sessionStorage.removeItem('checkout_redirect');
-            setTimeout(() => window.location.href = 'cart.html', 1000);
-        } else {
-            setTimeout(() => window.location.href = 'index.html', 1000);
+            localStorage.setItem(TOKEN_KEY, data.token);
+            sessionStorage.setItem('metromobiles_user_session', JSON.stringify(data.user));
+            
+            showNotification(`Welcome, ${data.user.name}!`);
+            
+            // Check for checkout redirect
+            const checkoutRedirect = sessionStorage.getItem('checkout_redirect');
+            if (checkoutRedirect) {
+                sessionStorage.removeItem('checkout_redirect');
+                setTimeout(() => window.location.href = 'cart.html', 1000);
+            } else {
+                setTimeout(() => window.location.href = 'index.html', 1000);
+            }
+        } catch (error) {
+            console.error('Google auth error:', error);
+            const errorEl = document.getElementById('login-error');
+            showError(errorEl, 'Failed to sign in with Google. Please try again.');
         }
     }
 
@@ -197,25 +193,29 @@
             return;
         }
 
-        // Get users
-        const users = getUsers();
-        const user = users.find(u => u.email === email);
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
 
-        if (!user) {
-            showError(errorEl, 'Email not found. Please sign up first.');
-            return;
+            const data = await response.json();
+
+            if (!response.ok) {
+                showError(errorEl, data.error || 'Login failed');
+                return;
+            }
+
+            localStorage.setItem(TOKEN_KEY, data.token);
+            sessionStorage.setItem('metromobiles_user_session', JSON.stringify(data.user));
+            
+            showNotification('Login successful!');
+            setTimeout(() => window.location.href = 'index.html', 1000);
+        } catch (error) {
+            console.error('Login error:', error);
+            showError(errorEl, 'Network error. Please try again.');
         }
-
-        // Simple password check (in production, use proper hashing)
-        if (user.password !== btoa(password)) {
-            showError(errorEl, 'Incorrect password');
-            return;
-        }
-
-        // Create session
-        createSession(user);
-        showNotification('Login successful!');
-        setTimeout(() => window.location.href = 'index.html', 1000);
     }
 
     async function handleSignup(e) {
@@ -243,52 +243,29 @@
             return;
         }
 
-        // Check if email exists
-        const users = getUsers();
-        if (users.find(u => u.email === email)) {
-            showError(errorEl, 'Email already registered. Please login.');
-            return;
+        try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                showError(errorEl, data.error || 'Registration failed');
+                return;
+            }
+
+            localStorage.setItem(TOKEN_KEY, data.token);
+            sessionStorage.setItem('metromobiles_user_session', JSON.stringify(data.user));
+            
+            showNotification('Account created successfully!');
+            setTimeout(() => window.location.href = 'index.html', 1000);
+        } catch (error) {
+            console.error('Signup error:', error);
+            showError(errorEl, 'Network error. Please try again.');
         }
-
-        // Create user
-        const newUser = {
-            id: Date.now(),
-            name: name,
-            email: email,
-            password: btoa(password), // Simple encoding (use proper hashing in production)
-            provider: 'email',
-            createdAt: new Date().toISOString(),
-            orders: []
-        };
-
-        users.push(newUser);
-        saveUsers(users);
-
-        // Create session
-        createSession(newUser);
-        showNotification('Account created successfully!');
-        setTimeout(() => window.location.href = 'index.html', 1000);
-    }
-
-    function getUsers() {
-        const data = localStorage.getItem(AUTH_STORAGE_KEY);
-        return data ? JSON.parse(data) : [];
-    }
-
-    function saveUsers(users) {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(users));
-    }
-
-    function createSession(user) {
-        const session = {
-            userId: user.id,
-            name: user.name,
-            email: user.email,
-            provider: user.provider,
-            picture: user.picture || null,
-            loginTime: Date.now()
-        };
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
     }
 
     function showError(element, message) {

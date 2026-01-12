@@ -76,8 +76,19 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="product-price">Price ($) *</label>
+                            <label for="product-mrp">MRP (₹) *</label>
+                            <input type="number" id="product-mrp" step="0.01" required placeholder="1299.99">
+                            <small>Maximum Retail Price (Original Price)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="product-price">Sale Price (₹) *</label>
                             <input type="number" id="product-price" step="0.01" required placeholder="999.99">
+                            <small>Selling price (must be less than or equal to MRP)</small>
+                        </div>
+
+                        <div id="discount-display" style="margin-top: -0.5rem; margin-bottom: 1rem; padding: 0.5rem; background: #f0f9ff; border-left: 3px solid #3b82f6; border-radius: 4px; display: none;">
+                            <span style="color: #1e40af; font-weight: 600;">💰 Discount: <span id="discount-percentage">0</span>% OFF</span>
                         </div>
 
                         <div class="form-group">
@@ -245,6 +256,28 @@
                 btn.parentElement.remove();
             }
         }
+
+        // Calculate and display discount percentage
+        function updateDiscountDisplay() {
+            const mrp = parseFloat(document.getElementById('product-mrp').value) || 0;
+            const salePrice = parseFloat(document.getElementById('product-price').value) || 0;
+            const discountDisplay = document.getElementById('discount-display');
+            const discountPercentage = document.getElementById('discount-percentage');
+
+            if (mrp > 0 && salePrice > 0 && salePrice < mrp) {
+                const discount = Math.round(((mrp - salePrice) / mrp) * 100);
+                discountPercentage.textContent = discount;
+                discountDisplay.style.display = 'block';
+            } else {
+                discountDisplay.style.display = 'none';
+            }
+        }
+
+        // Add event listeners when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('product-mrp')?.addEventListener('input', updateDiscountDisplay);
+            document.getElementById('product-price')?.addEventListener('input', updateDiscountDisplay);
+        });
     </script>
 
     <!-- Footer -->

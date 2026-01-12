@@ -1,13 +1,47 @@
 // Cart Page Functionality
 let cart = [];
+const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
+const TOKEN_KEY = 'metromobiles_auth_token';
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    await validateCartProducts();
     loadCart();
     updateCartCount();
     updateAuthNavigation();
     
     document.getElementById('checkout-btn').addEventListener('click', handleCheckout);
 });
+
+async function validateCartProducts() {
+    try {
+        const cart = getCart();
+        if (cart.length === 0) return;
+        
+        // Fetch current products from server
+        const response = await fetch(`${API_URL}/products`);
+        if (!response.ok) return;
+        
+        const currentProducts = await response.json();
+        const currentProductIds = new Set(
+            currentProducts.map(p => (p._id || p.id)?.toString())
+        );
+        
+        // Filter out products that no longer exist
+        const validCart = cart.filter(item => {
+            const itemId = item.id?.toString();
+            return currentProductIds.has(itemId);
+        });
+        
+        // If cart was cleaned up, save and notify
+        if (validCart.length !== cart.length) {
+            saveCart(validCart);
+            const removedCount = cart.length - validCart.length;
+            showNotification(`${removedCount} unavailable product(s) removed from cart`, 'warning');
+        }
+    } catch (error) {
+        console.error('Error validating cart:', error);
+    }
+}
 
 function loadCart() {
     cart = getCart();
@@ -48,19 +82,19 @@ function displayCart() {
                 <p class="cart-item-price">₹${item.price.toFixed(2)}</p>
             </div>
             <div class="cart-item-quantity">
-                <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">
+                <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">
                     <i class="fas fa-minus"></i>
                 </button>
                 <input type="number" value="${item.quantity}" min="1" max="${item.maxStock}" 
-                       onchange="setQuantity(${item.id}, this.value)" readonly>
-                <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">
+                       onchange="setQuantity('${item.id}', this.value)" readonly>
+                <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
             <div class="cart-item-total">
                 <p>₹${(item.price * item.quantity).toFixed(2)}</p>
             </div>
-            <button class="cart-item-remove" onclick="removeFromCart(${item.id})">
+            <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
@@ -70,7 +104,7 @@ function displayCart() {
 }
 
 function updateQuantity(productId, change) {
-    const item = cart.find(i => i.id === productId);
+    const item = cart.find(i => i.id == productId); // Use == for loose comparison
     if (!item) return;
     
     const newQuantity = item.quantity + change;
@@ -92,7 +126,7 @@ function updateQuantity(productId, change) {
 }
 
 function setQuantity(productId, value) {
-    const item = cart.find(i => i.id === productId);
+    const item = cart.find(i => i.id == productId); // Use == for loose comparison
     if (!item) return;
     
     const quantity = parseInt(value);
@@ -116,7 +150,7 @@ function setQuantity(productId, value) {
 
 function removeFromCart(productId) {
     if (confirm('Remove this item from cart?')) {
-        cart = cart.filter(item => item.id !== productId);
+        cart = cart.filter(item => item.id != productId); // Use != for loose comparison
         saveCart(cart);
         displayCart();
         updateCartCount();
@@ -140,15 +174,14 @@ function updateCartCount() {
     document.getElementById('cart-count').textContent = totalItems;
 }
 
-function handleCheckout() {
+async function handleCheckout() {
     if (cart.length === 0) {
         alert('Your cart is empty!');
         return;
     }
     
-    // Check if user is logged in
-    const session = sessionStorage.getItem('metromobiles_user_session');
-    if (!session) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
         if (confirm('Please login to checkout. Would you like to login now?')) {
             sessionStorage.setItem('checkout_redirect', 'true');
             window.location.href = 'auth.html';
@@ -156,8 +189,42 @@ function handleCheckout() {
         return;
     }
 
-    // Redirect to checkout page
-    window.location.href = 'checkout.html';
+    try {
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const tax = subtotal * 0.1;
+        const shipping = 10;
+        const total = subtotal + tax + shipping;
+
+        const response = await fetch(`${API_URL}/orders`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                items: cart.map(item => ({
+                    productId: item.id,
+                    name: item.name,
+                    brand: item.brand,
+                    price: item.price,
+                    quantity: item.quantity,
+                    image: item.image
+                })),
+                total
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Checkout failed');
+        }
+
+        alert('Order placed successfully!');
+        localStorage.removeItem('metromobiles_cart');
+        window.location.href = 'profile.html';
+    } catch (error) {
+        console.error('Checkout error:', error);
+        alert('Failed to place order. Please try again.');
+    }
 }
 
 function saveOrderToProfile(cartItems, total) {
@@ -165,25 +232,37 @@ function saveOrderToProfile(cartItems, total) {
     const users = JSON.parse(localStorage.getItem('metromobiles_users') || '[]');
     
     const user = users.find(u => u.id === session.userId);
-    if (user) {
-        if (!user.orders) user.orders = [];
-        
-        user.orders.push({
-            id: Date.now(),
-            date: new Date().toISOString(),
-            items: cartItems.map(item => ({
-                id: item.id,
-                name: item.name,
-                brand: item.brand,
-                price: item.price,
-                quantity: item.quantity,
-                image: item.image
-            })),
-            total: total
-        });
-        
-        localStorage.setItem('metromobiles_users', JSON.stringify(users));
+    if (!user) return;
+    
+    if (!user.orders) {
+        user.orders = [];
     }
+    
+    user.orders.push({
+        items: cartItems,
+        total,
+        date: new Date().toISOString()
+    });
+    
+    localStorage.setItem('metromobiles_users', JSON.stringify(users));
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    
+    const icon = type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+    const bgColor = type === 'warning' ? '#fbbf24' : '#10b981';
+    
+    notification.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+    notification.style.background = bgColor;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.add('show'), 100);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
 }
 
 function updateAuthNavigation() {
@@ -191,7 +270,11 @@ function updateAuthNavigation() {
     const authNavItem = document.getElementById('auth-nav-item');
     
     if (session && authNavItem) {
-        const userData = JSON.parse(session);
-        authNavItem.innerHTML = `<a href="profile.html"><i class="fas fa-user-circle"></i> ${userData.name}</a>`;
+        try {
+            const userData = JSON.parse(session);
+            authNavItem.innerHTML = `<a href="profile.html"><i class="fas fa-user-circle"></i> ${userData.name}</a>`;
+        } catch (error) {
+            console.error('Error parsing session:', error);
+        }
     }
 }

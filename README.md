@@ -1,163 +1,186 @@
-# MetroMobiles E-Commerce Website
+# MetroMobiles E-Commerce Platform
 
-A fully functional e-commerce website for mobile phones with an integrated admin portal and Google OAuth authentication.
+Modern e-commerce platform with MongoDB database and Cloudinary image storage.
+
+## Tech Stack
+
+- **Backend**: Node.js + Express
+- **Database**: MongoDB (local or MongoDB Atlas)
+- **Image Storage**: Cloudinary
+- **Authentication**: JWT + bcrypt
+- **Frontend**: Vanilla JavaScript
+
+## Setup Instructions
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. MongoDB Setup
+
+**Option A: Local MongoDB**
+- Install MongoDB Community Edition
+- Start MongoDB service: `mongod`
+- Use connection string: `mongodb://localhost:27017/metromobiles`
+
+**Option B: MongoDB Atlas (Cloud)**
+1. Create account at https://www.mongodb.com/cloud/atlas
+2. Create a free cluster
+3. Get connection string from "Connect" → "Connect your application"
+4. Replace in `.env`: `mongodb+srv://username:password@cluster.mongodb.net/metromobiles`
+
+### 3. Cloudinary Setup
+
+1. Create free account at https://cloudinary.com
+2. Go to Dashboard to get credentials:
+   - Cloud Name
+   - API Key
+   - API Secret
+3. Add to `.env` file
+
+### 4. Environment Variables
+
+Create `.env` file in project root:
+
+```env
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/metromobiles
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# JWT
+JWT_SECRET=your_super_secret_key_change_in_production
+
+# Server
+PORT=3000
+NODE_ENV=development
+```
+
+### 5. Start Server
+
+```bash
+npm start
+```
+
+Or for development with auto-restart:
+
+```bash
+npm run dev
+```
+
+### 6. Access Application
+
+- **Frontend**: http://localhost:3000
+- **Admin Panel**: http://localhost:3000/admin.html (default password: `admin123`)
 
 ## Features
 
-### Authentication System
-- **Email/Password Registration**: Create account with email
-- **Google OAuth Login**: Sign in with your Google account (real OAuth implementation)
-- **User Sessions**: Secure session management with automatic timeout
-- **Protected Checkout**: Login required to complete purchases
-- **User Profiles**: View order history and account details
+### User Features
+- Email/Password Registration & Login
+- Google OAuth Authentication
+- Shopping Cart Management
+- Order History
+- Profile Management
 
-### Main Website (index.html)
-- **Product Catalog**: Browse through all available mobile phones
-- **Search Functionality**: Search products by name, brand, or description
-- **Sort Options**: Sort by price (low to high, high to low) or name
-- **Brand Filter**: Filter products by manufacturer
-- **Product Details**: View product specifications, pricing, and stock availability
-- **Add to Cart**: Add products to shopping cart with stock validation
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
+### Admin Features
+- Product Management (CRUD)
+- Multi-image Upload to Cloudinary
+- Stock Management
+- Product Specifications & Features
 
-### Shopping Cart (cart.html)
-- **Cart Management**: View all items in your cart
-- **Quantity Controls**: Increase/decrease product quantities
-- **Real-time Calculations**: Automatic subtotal, tax (10%), and shipping calculations
-- **Remove Items**: Delete products from cart
-- **Checkout Process**: Complete purchase with order summary
-- **Stock Integration**: Automatically updates product stock after purchase
+### Product Features
+- All images stored in Cloudinary
+- Automatic image optimization
+- Secure URLs
+- Old images deleted when product updated/removed
 
-### Admin Portal (admin.html)
-- **Add Products**: Create new products with complete details
-- **Edit Products**: Modify existing product information
-- **Delete Products**: Remove products from the catalog
-- **Product Management**: View all products with key information
-- **Stock Monitoring**: Track low stock items
-- **Form Validation**: Ensures all required fields are filled correctly
-- **Real-time Updates**: Changes reflect immediately on the main website
+## API Endpoints
 
-## Product Information Fields
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/google` - Google OAuth
+- `GET /api/auth/profile` - Get user profile (requires token)
 
-When adding/editing products in the admin panel:
-- **Product Name** (Required): Full name of the mobile phone
-- **Brand** (Required): Manufacturer name (e.g., Apple, Samsung)
-- **Price** (Required): Product price in USD
-- **Description** (Required): Detailed product description
-- **Image URL** (Required): Direct link to product image
-- **Stock Quantity** (Required): Number of units available
-- **Specifications** (Optional): Technical specs (RAM, Storage, Display, etc.)
+### Products
+- `GET /api/products` - Get all products
+- `GET /api/products/:id` - Get single product
+- `POST /api/products` - Add product (requires images)
+- `PUT /api/products/:id` - Update product
+- `DELETE /api/products/:id` - Delete product & images
 
-## How to Use
+### Orders
+- `POST /api/orders` - Create order (requires auth)
 
-### For Customers:
-1. **Browse Products**: Open `index.html` to view all available products
-2. **Search/Filter**: Use the search bar or filters to find specific products
-3. **Add to Cart**: Click "Add to Cart" button on any product
-4. **View Cart**: Click "Cart" in navigation to review your items
-5. **Checkout**: Review your order and click "Proceed to Checkout"
+## Security Notes
 
-### For Admins:
-1. **Access Admin**: Open `admin.html` or click "Admin" in navigation
-2. **Add Product**: Fill out the form with product details and click "Add Product"
-3. **Edit Product**: Click "Edit" button on any product card
-4. **Delete Product**: Click "Delete" button to remove a product
-5. **View Stats**: Monitor total products and stock levels
+1. **Change JWT_SECRET** in production
+2. **Use HTTPS** in production
+3. **Enable MongoDB authentication** in production
+4. **Use environment variables** for all secrets
+5. **Never commit `.env` file**
 
-## Technology Stack
+## Troubleshooting
 
-- **HTML5**: Semantic markup structure
-- **CSS3**: Modern styling with CSS Grid and Flexbox
-- **JavaScript (ES6+)**: Interactive functionality
-- **LocalStorage**: Data persistence (no backend required)
-- **Font Awesome**: Icon library
-- **Responsive Design**: Mobile-first approach
+### MongoDB Connection Issues
+- Check MongoDB service is running
+- Verify connection string in `.env`
+- Check network access in MongoDB Atlas
 
-## Data Storage
+### Cloudinary Upload Fails
+- Verify credentials in `.env`
+- Check file size limits
+- Ensure `multer-storage-cloudinary` is installed
 
-All data is stored in the browser's localStorage:
-- `metromobiles_products`: Product catalog
-- `metromobiles_cart`: Shopping cart items
+### Authentication Issues
+- Clear browser localStorage
+- Check JWT_SECRET is set
+- Verify token in Network tab
 
-The website comes pre-loaded with 6 sample products including:
-- iPhone 15 Pro
-- Samsung Galaxy S24 Ultra
-- Google Pixel 8 Pro
-- OnePlus 12
-- Xiaomi 14 Pro
-- iPhone 14
+## Data Models
 
-## File Structure
-
-```
-metro_mobiles_web/
-├── index.html          # Main homepage
-├── cart.html           # Shopping cart page
-├── admin.html          # Admin portal
-├── css/
-│   └── styles.css      # All styling
-└── js/
-    ├── main.js         # Homepage functionality
-    ├── cart.js         # Cart functionality
-    └── admin.js        # Admin functionality
+### User Model
+```javascript
+{
+  name: String,
+  email: String (unique),
+  password: String (hashed),
+  provider: 'email' | 'google',
+  picture: String (Cloudinary URL),
+  orders: [{
+    orderId: String,
+    date: Date,
+    items: Array,
+    total: Number
+  }]
+}
 ```
 
-## Features in Detail
-
-### Smart Inventory Management
-- Stock levels automatically decrease after checkout
-- Low stock warnings (< 10 items)
-- Out of stock products cannot be added to cart
-- Maximum quantity validation
-
-### Shopping Experience
-- Real-time cart count in navigation
-- Product images with fallback for broken links
-- Smooth animations and transitions
-- Visual notifications for actions
-
-### Admin Experience
-- Sticky form for easy access while scrolling
-- Product counter statistics
-- Inline editing with pre-filled forms
-- Confirmation dialogs for destructive actions
-
-## Browser Support
-
-Works on all modern browsers:
-- Chrome/Edge (recommended)
-- Firefox
-- Safari
-- Opera
-
-## Getting Started
-
-1. Open `index.html` in your web browser
-2. Browse products or go to Admin panel to add your own
-3. Start shopping!
-
-## Tips
-
-- **Clear Data**: Open browser console and run `localStorage.clear()` to reset all data
-- **Image URLs**: Use direct image links from services like Unsplash, Imgur, or your own hosting
-- **Stock Management**: Monitor stock levels in the admin panel to restock when needed
-- **Backup**: Export localStorage data if you want to save your products
-
-## Future Enhancements
-
-Possible additions for the future:
-- User authentication
-- Backend database integration
-- Payment gateway integration
-- Order history
-- Product reviews and ratings
-- Image upload functionality
-- Advanced analytics
-
-## Google OAuth Setup
-
-The application is configured with Google OAuth Client ID:
+### Product Model
+```javascript
+{
+  name: String,
+  brand: String,
+  price: Number,
+  image: String (Cloudinary URL),
+  images: [String] (Cloudinary URLs),
+  description: String,
+  stock: Number,
+  specifications: Map,
+  features: [String],
+  cloudinaryIds: [String] (for deletion)
+}
 ```
-<userPrompt>
-Provide the fully rewritten file, incorporating the suggested code change. You must produce the complete file.
-</userPrompt>
+
+## License
+
+MIT
+
+## Support
+
+For issues, please create a GitHub issue or contact metromobilestsr@gmail.com
